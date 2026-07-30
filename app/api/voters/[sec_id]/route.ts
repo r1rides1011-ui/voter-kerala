@@ -9,9 +9,6 @@ export async function GET(req: NextRequest, context: { params: { sec_id: string 
     const rawSecId = resolvedParams.sec_id;
     const sec_id = rawSecId?.trim();
 
-    console.log("[DEBUG] Requested sec_id:", rawSecId);
-    console.log("[DEBUG] Trimmed sec_id:", sec_id);
-
     if (!sec_id) {
       return NextResponse.json(
         { success: false, error: "Missing sec_id" },

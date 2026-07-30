@@ -72,39 +72,44 @@ export async function GET(req: NextRequest) {
     }
 
     // 2. Build MongoDB filter for pincodes collection
-    const query: Record<string, any> = {}
+    // Use $and array to safely combine multiple $or conditions
+    const conditions: Record<string, any>[] = []
 
     if (district_name) {
-      query.district_name = district_name.toUpperCase()
+      conditions.push({ district_name: district_name.toUpperCase() })
     }
     if (lb_name) {
-      query.lb_name = lb_name
+      conditions.push({ lb_name })
     }
     if (status === "resolved") {
-      query.pincode = { $ne: null, $exists: true }
+      conditions.push({ pincode: { $ne: null, $exists: true } })
     } else if (status === "unresolved") {
-      query.$or = [{ pincode: null }, { pincode: { $exists: false } }]
+      conditions.push({ $or: [{ pincode: null }, { pincode: { $exists: false } }] })
     }
 
     if (verification === "verified") {
-      query.is_verified = true
+      conditions.push({ is_verified: true })
     } else if (verification === "unverified") {
-      query.is_verified = false
-      query.pincode = { $ne: null, $exists: true }
+      conditions.push({ is_verified: false })
+      conditions.push({ pincode: { $ne: null, $exists: true } })
     } else if (verification === "flagged") {
-      query.is_flagged = true
+      conditions.push({ is_flagged: true })
     }
 
     if (search) {
       const qRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
-      query.$or = [
-        { ward_name: qRegex },
-        { ward_number: qRegex },
-        { lb_name: qRegex },
-        { district_name: qRegex },
-        { pincode: qRegex },
-      ]
+      conditions.push({
+        $or: [
+          { ward_name: qRegex },
+          { ward_number: qRegex },
+          { lb_name: qRegex },
+          { district_name: qRegex },
+          { pincode: qRegex },
+        ],
+      })
     }
+
+    const query: Record<string, any> = conditions.length > 0 ? { $and: conditions } : {}
 
     // 3. Fast parallel query execution
     const [storedPincodes, filteredTotal, allDocs] = await Promise.all([
