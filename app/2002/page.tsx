@@ -52,7 +52,7 @@ export default function VoterSearchDual() {
   // LOAD JSON DATA
   // ----------------------
   useEffect(() => {
-    fetch("/2002-70-113.json")
+    fetch("/2002-62-90.json")
       .then((res) => res.json())
       .then((json: Voter[]) => setData(json));
   }, []);
@@ -73,7 +73,7 @@ export default function VoterSearchDual() {
       );
 
       const houseMatch =
-        !filterHouse || safe(v["House No"]).includes(filterHouse.toLowerCase());
+        !filterHouse || safe(v["House Name English"]).includes(filterHouse.toLowerCase());
 
       const sexMatch = filterSex === "all" || v.Sex === filterSex;
 

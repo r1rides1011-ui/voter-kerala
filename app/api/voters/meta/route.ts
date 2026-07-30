@@ -34,7 +34,11 @@ export async function GET(req: NextRequest) {
     // 2️⃣ LOCAL BODIES
     // =====================================================================================
     if (type === "lbs") {
+      const match: any = {}
+      if (district) match.district_code = district
+
       const data = await voters.aggregate([
+        ...(district ? [{ $match: match }] : []),
         {
           $group: {
             _id: { code: "$lb_code", name: "$lb_name" }
@@ -54,8 +58,11 @@ export async function GET(req: NextRequest) {
       if (!district)
         return NextResponse.json({ success: false, error: "district required" })
 
+      const match: any = { district_code: district }
+      if (lb) match.lb_code = lb
+
       const data = await voters.aggregate([
-        { $match: { district_code: district } },
+        { $match: match },
         {
           $group: {
             _id: { code: "$ward_number", name: "$ward_name" }
@@ -72,15 +79,17 @@ export async function GET(req: NextRequest) {
     // 4️⃣ BOOTHS — FIXED (WARD FIRST, LB SECOND)
     // =====================================================================================
     if (type === "booths") {
-      if (!ward && !lb)
+      const match: any = {}
+      if (district) match.district_code = district
+      if (lb) match.lb_code = lb
+      if (ward) match.ward_number = ward
+
+      if (Object.keys(match).length === 0) {
         return NextResponse.json({
           success: false,
-          error: "ward or lb must be provided"
+          error: "At least one location filter (district, lb, or ward) must be provided"
         })
-
-      const match: any = {}
-      if (ward) match.ward_number = ward
-      else if (lb) match.lb_code = lb
+      }
 
       const data = await voters.aggregate([
         { $match: match },

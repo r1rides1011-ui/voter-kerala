@@ -1,0 +1,548 @@
+[
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "024",
+    "ward_name": "PRIYADARSHINI"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "003",
+    "ward_name": "VENNOOR SOUTH"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "010",
+    "ward_name": "VALLUVALLY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "020",
+    "ward_name": "PATHIYARI"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "007",
+    "ward_name": "MANNAM"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "009",
+    "ward_name": "CHETTIKKUNNU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "018",
+    "ward_name": "THRIKKAPURAM"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "004",
+    "ward_name": "ANNAMANADA WEST"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "008",
+    "ward_name": "KADATHUKADAVU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "017",
+    "ward_name": "MADHAVAPURAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "015",
+    "ward_name": "TREASURY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "007",
+    "ward_name": "WEST KORATTY"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "017",
+    "ward_name": "CHERIYAPPILLY"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "005",
+    "ward_name": "MANAPPURAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "020",
+    "ward_name": "THALUK HOSPITAL"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "010",
+    "ward_name": "LIBRARY"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "011",
+    "ward_name": "KOCHAL"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "007",
+    "ward_name": "AMBAZHAKKAD"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "014",
+    "ward_name": "ASHAN COLONY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "020",
+    "ward_name": "MALAYAMKUNNU"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "011",
+    "ward_name": "ERAYAMKUDY"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "012",
+    "ward_name": "MUNICIPAL OFFICE"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "019",
+    "ward_name": "MAYYAR"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "003",
+    "ward_name": "ANNALLUR"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "008",
+    "ward_name": "DR.AMBEDKAR"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "014",
+    "ward_name": "KURUVILASSERY"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "014",
+    "ward_name": "KOTTUVALLYKKAVU"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "011",
+    "ward_name": "KOTTAMURI"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "012",
+    "ward_name": "SNEHAGIRI"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "016",
+    "ward_name": "MALA"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "015",
+    "ward_name": "KACHANIKODAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "013",
+    "ward_name": "PALLIKKADAVU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "020",
+    "ward_name": "KOTTUVALLY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "002",
+    "ward_name": "ANAPPARA"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "019",
+    "ward_name": "VADAMA"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "006",
+    "ward_name": "VALOOR"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "010",
+    "ward_name": "MAMBRA"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "023",
+    "ward_name": "NADUMURI"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "025",
+    "ward_name": "CANAL"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "013",
+    "ward_name": "VALIYAPARAMBU"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "021",
+    "ward_name": "MAREKKAD"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "004",
+    "ward_name": "PARAKKOOTTAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "009",
+    "ward_name": "PALACE"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "006",
+    "ward_name": "KAREEPPARAMBU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "011",
+    "ward_name": "OOMANKUZHITHADAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "023",
+    "ward_name": "MARKET"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "014",
+    "ward_name": "PALISSERY SOUTH"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "015",
+    "ward_name": "POOVATHUSSERY"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "005",
+    "ward_name": "BANGLAVUPADY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "012",
+    "ward_name": "PALISSERY NORTH"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "002",
+    "ward_name": "GURUMANDIRAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "004",
+    "ward_name": "MANA"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "016",
+    "ward_name": "PANCHAYATH"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "001",
+    "ward_name": "ALATHUR"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "007",
+    "ward_name": "ST ANS CHURCH"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "008",
+    "ward_name": "VAPARAMB"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "013",
+    "ward_name": "MADRASSA"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "016",
+    "ward_name": "SNEHALAYAM"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "013",
+    "ward_name": "PALISSERY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "019",
+    "ward_name": "MELADOOR"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "018",
+    "ward_name": "KEEZHADOOR"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "021",
+    "ward_name": "SASTHA TEMPLE"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "018",
+    "ward_name": "NASRATH"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "003",
+    "ward_name": "KHANDAKARNANVELI"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "001",
+    "ward_name": "KOLKUNNU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "001",
+    "ward_name": "KOTHAKULAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "002",
+    "ward_name": "SANTHIVANAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "026",
+    "ward_name": "THANDIKKAL"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "008",
+    "ward_name": "KOONAMPARAMBU"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "015",
+    "ward_name": "KAVANAD"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "004",
+    "ward_name": "KIZHAKKEPPRAM"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "022",
+    "ward_name": "KATTIKKULAM"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "005",
+    "ward_name": "PAZHUKKARA"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "024",
+    "ward_name": "KAITHARAM"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "002",
+    "ward_name": "VENNOOR NORTH"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "016",
+    "ward_name": "KUMBIDY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "006",
+    "ward_name": "ASHTAMICHIRA"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "017",
+    "ward_name": "EDAYATTOOR"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "001",
+    "ward_name": "MANGALAPPUZHA SEMINARI"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "003",
+    "ward_name": "DESAM KADAVU"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "009",
+    "ward_name": "KOTTAVATHIL"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "010",
+    "ward_name": "CHAKKAMPARAMBU"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "017",
+    "ward_name": "NEITHAKUDY"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Mala",
+    "ward_number": "018",
+    "ward_name": "KUNNATHUKADU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "021",
+    "ward_name": "ILLATH"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "019",
+    "ward_name": "THRIKKUNNATH"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "022",
+    "ward_name": "PULINCHODU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Aluva",
+    "ward_number": "006",
+    "ward_name": "GANAPATHY TEMPLE"
+  },
+  {
+    "district_name": "THRISSUR",
+    "lb_name": "Annamanada",
+    "ward_number": "005",
+    "ward_name": "ANNAMANADA TOWN"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "012",
+    "ward_name": "KOONAMMAVU"
+  },
+  {
+    "district_name": "ERNAKULAM",
+    "lb_name": "Kottuvally",
+    "ward_number": "009",
+    "ward_name": "THATHAPPILLY"
+  }
+]

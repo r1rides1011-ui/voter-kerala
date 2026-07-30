@@ -8,6 +8,16 @@ import { Navbar } from "@/components/navbar"
 import { ProfileCard } from "@/components/profile-card"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import type { Voter } from "@/lib/types"
 import { LoadingSkeleton } from "@/components/loading-skeleton"
 
@@ -21,6 +31,9 @@ import {
   Hash,
   Phone,
   Heart,
+  Check,
+  Loader2,
+  Building2,
 } from "lucide-react"
 
 // -----------------------------------------
@@ -33,7 +46,7 @@ const DetailItem = ({
   isLink = false,
 }: {
   label: string
-  value: string | number | null | undefined
+  value: any
   icon?: React.ElementType
   isLink?: boolean
 }) => (
@@ -67,6 +80,13 @@ export default function VoterProfilePage() {
   // ❤️ Favorite state
   const [isFavorite, setIsFavorite] = useState(false)
   const [favLoading, setFavLoading] = useState(false)
+
+  // 📍 Pincode Edit State
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false)
+  const [pinInput, setPinInput] = useState("")
+  const [applyToWard, setApplyToWard] = useState(false)
+  const [pinUpdating, setPinUpdating] = useState(false)
+  const [pinMessage, setPinMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // -----------------------------------------
   // FETCH VOTER BY SEC ID
@@ -122,6 +142,61 @@ export default function VoterProfilePage() {
       console.error("Favorite toggle failed:", err)
     } finally {
       setFavLoading(false)
+    }
+  }
+
+  // -----------------------------------------
+  // UPDATE PINCODE HANDLER
+  // -----------------------------------------
+  const handleUpdatePincode = async () => {
+    if (!voter) return
+    const cleanPin = pinInput.trim()
+
+    if (cleanPin && !/^\d{6}$/.test(cleanPin)) {
+      setPinMessage({ type: "error", text: "Pincode must be a 6-digit number" })
+      return
+    }
+
+    setPinUpdating(true)
+    setPinMessage(null)
+
+    try {
+      if (applyToWard) {
+        // Update pincode for entire Ward & all matching voters
+        const res = await axios.post("/api/pincode/update", {
+          district_name: voter.district_name,
+          lb_name: voter.lb_name,
+          ward_number: voter.ward_number,
+          ward_name: voter.ward_name,
+          pincode: cleanPin,
+        })
+
+        if (res.data.success) {
+          setVoter({ ...voter, pincode: cleanPin })
+          setPinMessage({ type: "success", text: res.data.message })
+          setTimeout(() => setIsPinModalOpen(false), 1500)
+        } else {
+          setPinMessage({ type: "error", text: res.data.error || "Failed to update ward pincode" })
+        }
+      } else {
+        // Update pincode just for this individual voter
+        const res = await axios.patch(`/api/voters/${voter.sec_id}`, {
+          pincode: cleanPin,
+        })
+
+        if (res.data.success) {
+          setVoter({ ...voter, pincode: cleanPin })
+          setPinMessage({ type: "success", text: `Updated pincode to ${cleanPin || "None"} for ${voter.name}!` })
+          setTimeout(() => setIsPinModalOpen(false), 1500)
+        } else {
+          setPinMessage({ type: "error", text: res.data.error || "Failed to update voter pincode" })
+        }
+      }
+    } catch (err) {
+      console.error("Pincode update error:", err)
+      setPinMessage({ type: "error", text: "Network error updating pincode" })
+    } finally {
+      setPinUpdating(false)
     }
   }
 
@@ -225,6 +300,11 @@ export default function VoterProfilePage() {
               <span className="px-3 py-1 bg-muted rounded-full text-xs font-medium">
                 Booth: {voter.booth_number || "-"}
               </span>
+
+              {/* Pincode Tag in Header */}
+              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-mono font-semibold flex items-center gap-1">
+                <MapPin className="w-3 h-3" /> {voter.pincode || "No Pincode"}
+              </span>
             </div>
           </div>
 
@@ -242,7 +322,7 @@ export default function VoterProfilePage() {
               <Heart className={`w-6 h-6 ${isFavorite ? "fill-red-500" : ""}`} />
             </button>
 
-            {/* Edit */}
+            {/* Edit Profile */}
             <Button asChild>
               <Link
                 href={`/voter/${voter.sec_id}/edit`}
@@ -303,9 +383,44 @@ export default function VoterProfilePage() {
                   />
                 </div>
 
+                {/* Pincode & Quick Edit Bar */}
+                <div className="mt-6 p-4 rounded-lg bg-muted/40 border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-full bg-primary/10 text-primary">
+                      <MapPin className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Postal Pincode</div>
+                      <div className="text-lg font-bold font-mono text-foreground">
+                        {voter.pincode ? (
+                          <Badge variant="outline" className="text-sm font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
+                            {voter.pincode}
+                          </Badge>
+                        ) : (
+                          <span className="text-amber-600 dark:text-amber-400 text-sm font-normal italic">
+                            No Pincode Assigned
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => {
+                      setPinInput(voter.pincode || "")
+                      setPinMessage(null)
+                      setIsPinModalOpen(true)
+                    }}
+                    className="gap-2 self-start sm:self-auto"
+                    variant="outline"
+                  >
+                    <Edit className="w-4 h-4 text-primary" /> Update Pincode
+                  </Button>
+                </div>
+
                 <div className="mt-8 pt-6 border-t">
                   <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" /> Geographic Coordinates
+                    <Map className="w-4 h-4 text-primary" /> Geographic Coordinates
                   </h3>
 
                   <div className="flex flex-wrap gap-8">
@@ -388,6 +503,65 @@ export default function VoterProfilePage() {
           </div>
         </div>
       </main>
+
+      {/* Quick Pincode Update Modal */}
+      <Dialog open={isPinModalOpen} onOpenChange={setIsPinModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Update Pincode for {voter.name}
+            </DialogTitle>
+            <DialogDescription>
+              Location: {voter.district_name} → {voter.lb_name} (Ward {voter.ward_number})
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-3">
+            {pinMessage && (
+              <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${pinMessage.type === "success" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30" : "bg-destructive/10 text-destructive border border-destructive/30"}`}>
+                {pinMessage.text}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-muted-foreground">6-Digit Postal Pincode</label>
+              <Input
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                placeholder="e.g. 683101"
+                maxLength={6}
+                className="font-mono text-lg tracking-wider"
+              />
+            </div>
+
+            <div className="flex items-start gap-2 pt-2 border-t">
+              <input
+                type="checkbox"
+                id="applyToWardCheck"
+                checked={applyToWard}
+                onChange={(e) => setApplyToWard(e.target.checked)}
+                className="mt-1 rounded border-muted-foreground text-primary focus:ring-primary h-4 w-4"
+              />
+              <label htmlFor="applyToWardCheck" className="text-xs text-muted-foreground cursor-pointer">
+                <span className="font-semibold text-foreground">Apply to entire Ward {voter.ward_number} ({voter.lb_name})</span>
+                <br />
+                Updates pincode for all voters matching this local body ward in MongoDB.
+              </label>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsPinModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdatePincode} disabled={pinUpdating} className="gap-2">
+              {pinUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              Save Pincode
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

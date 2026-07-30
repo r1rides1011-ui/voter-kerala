@@ -16,19 +16,21 @@ export async function GET(req: NextRequest) {
     const sec_id = searchParams.get("sec_id")?.trim()
     const house_no = searchParams.get("house_no")?.trim()
     const house_name = searchParams.get("house_name")?.trim()
+    const guardian_name = searchParams.get("guardian_name")?.trim()
     const phone = searchParams.get("phone")?.trim()
     const ward_number = searchParams.get("ward_number")?.trim()
     const booth_number = searchParams.get("booth_number")?.trim()
     const district_code = searchParams.get("district_code")?.trim()
     const lb_code = searchParams.get("lb_code")?.trim()
+    const pincode = searchParams.get("pincode")?.trim()
 
     const skip = Number.parseInt(searchParams.get("skip") || "0")
     const limit = Number.parseInt(searchParams.get("limit") || "30")
 
     // 2. Guard Clause: If no filters, don't scan the DB (Save resources)
     const hasFilters = 
-      name || sec_id || house_no || house_name || phone || 
-      ward_number || booth_number || district_code || lb_code
+      name || sec_id || house_no || house_name || guardian_name || phone || 
+      ward_number || booth_number || district_code || lb_code || pincode
 
     if (!hasFilters) {
       return NextResponse.json({ success: true, data: [], total: 0 })
@@ -88,6 +90,15 @@ export async function GET(req: NextRequest) {
     // Phone: Partial match
     if (phone) {
       query.phone = { $regex: escapeRegex(phone), $options: "i" }
+    }
+
+    if (guardian_name) {
+      query.guardian_name = { $regex: escapeRegex(guardian_name), $options: "i" }
+    }
+
+    // Pincode: exact match (indexed field)
+    if (pincode) {
+      query.pincode = pincode
     }
 
     // 4. Execution

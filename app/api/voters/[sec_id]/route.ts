@@ -58,3 +58,54 @@ export async function GET(req: NextRequest, context: { params: { sec_id: string 
     );
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  context: { params: { sec_id: string } | Promise<{ sec_id: string }> }
+) {
+  try {
+    const resolvedParams = await context.params;
+    const sec_id = resolvedParams.sec_id?.trim();
+    if (!sec_id) {
+      return NextResponse.json(
+        { success: false, error: "Missing sec_id" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    const { pincode, phone, guardian_name, house_no, house_name, ...rest } = body;
+
+    const voters = await getVotersCollection();
+    const updateDoc: Record<string, any> = { ...rest, updated_at: new Date() };
+
+    if (pincode !== undefined) updateDoc.pincode = pincode ? String(pincode).trim() : null;
+    if (phone !== undefined) updateDoc.phone = phone ? String(phone).trim() : null;
+    if (guardian_name !== undefined) updateDoc.guardian_name = guardian_name;
+    if (house_no !== undefined) updateDoc.house_no = house_no;
+    if (house_name !== undefined) updateDoc.house_name = house_name;
+
+    const result = await voters.updateOne(
+      { sec_id: { $regex: `^${sec_id}$`, $options: "i" } },
+      { $set: updateDoc }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { success: false, error: "Voter not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Voter profile updated successfully",
+    });
+  } catch (error) {
+    console.error("PATCH voter error:", error)
+    return NextResponse.json(
+      { success: false, error: "Failed to update voter" },
+      { status: 500 }
+    );
+  }
+}

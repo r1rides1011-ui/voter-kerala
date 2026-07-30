@@ -9,6 +9,7 @@ import {
   LogOut,
   LogIn,
   Heart,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut, signIn } from "next-auth/react";
@@ -50,6 +51,13 @@ export function Navbar() {
             <Link href="/map">
               <Map className="w-4 h-4" />
               Map
+            </Link>
+          </Button>
+
+          <Button variant="ghost" asChild className="gap-2">
+            <Link href="/pincode">
+              <MapPin className="w-4 h-4 text-primary" />
+              Pincodes
             </Link>
           </Button>
 
@@ -124,6 +132,14 @@ export function Navbar() {
         >
           <Map className="w-5 h-5" />
           Map
+        </Link>
+
+        <Link
+          href="/pincode"
+          className="flex flex-col items-center text-xs text-muted-foreground"
+        >
+          <MapPin className="w-5 h-5 text-primary" />
+          Pincodes
         </Link>
 
         <Link

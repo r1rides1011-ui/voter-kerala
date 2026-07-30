@@ -40,6 +40,9 @@ export interface Voter {
     coordinates: [number | null, number | null]
   }
 
+  // Pincode
+  pincode?: string
+
   // Status
   voter_status?: "active" | "inactive"
   is_flagged?: boolean
@@ -78,11 +81,13 @@ export type SearchFilters = {
   sec_id?: string
   house_no?: string
   house_name?: string   // <-- ADD THIS
+  guardian_name?: string
   phone?: string
   ward_number?: string | number
   booth_number?: string | number
   district_code?: string
   lb_code?: string
+  pincode?: string
 }
 // ------------------------------------------------------------
 // API Response Wrapper
@@ -93,3 +98,4 @@ export interface ApiResponse<T> {
   message?: string
   error?: string
 }
+
