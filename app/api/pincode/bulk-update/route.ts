@@ -37,37 +37,46 @@ export async function POST(req: NextRequest) {
     const voters = await getVotersCollection()
     const pincodesCol = db.collection("pincodes")
 
-    // 1. Get all distinct location combos from voters
-    const combos = await voters.aggregate([
-      {
-        $group: {
-          _id: {
-            district_name: "$district_name",
-            district_code: "$district_code",
-            lb_name: "$lb_name",
-            lb_code: "$lb_code",
-            ward_name: "$ward_name",
-            ward_number: "$ward_number",
+    // 1. Fetch cached pincodes into memory map
+    const existingPincodes = await pincodesCol.find({}).toArray()
+    const pincodeMap = new Map<string, any>()
+    for (const p of existingPincodes) {
+      const key = `${p.district_name?.toUpperCase()}|${p.lb_name}|${p.ward_number}`
+      pincodeMap.set(key, p)
+    }
+
+    // 2. Get distinct location combos from pincodes collection or voters fallback
+    let combos: any[] = existingPincodes
+    if (combos.length === 0) {
+      combos = await voters.aggregate([
+        {
+          $group: {
+            _id: {
+              district_name: "$district_name",
+              district_code: "$district_code",
+              lb_name: "$lb_name",
+              lb_code: "$lb_code",
+              ward_name: "$ward_name",
+              ward_number: "$ward_number",
+            },
           },
         },
-      },
-    ]).toArray()
+      ]).toArray()
+    }
 
     const total = combos.length
     let resolved = 0
     let failed = 0
     let cached = 0
 
-    for (const combo of combos) {
-      const { district_name, district_code, lb_name, lb_code, ward_name, ward_number } = combo._id
+    for (const item of combos) {
+      const district_name = item.district_name || item._id?.district_name || ""
+      const lb_name = item.lb_name || item._id?.lb_name || ""
+      const ward_name = item.ward_name || item._id?.ward_name || ""
+      const ward_number = item.ward_number || item._id?.ward_number || ""
 
-      // Check cache first
-      const existing = await pincodesCol.findOne({
-        district_name: district_name?.toUpperCase(),
-        lb_name,
-        ward_number,
-      })
-
+      const key = `${district_name.toUpperCase()}|${lb_name}|${ward_number}`
+      const existing = pincodeMap.get(key)
       let pincode: string | null = existing?.pincode || null
 
       if (!pincode) {
@@ -77,10 +86,10 @@ export async function POST(req: NextRequest) {
 
         // Save to cache
         await pincodesCol.updateOne(
-          { district_name: district_name?.toUpperCase(), lb_name, ward_number },
+          { district_name: district_name.toUpperCase(), lb_name, ward_number },
           {
             $set: {
-              district_name: district_name?.toUpperCase(),
+              district_name: district_name.toUpperCase(),
               lb_name,
               ward_name,
               ward_number,
@@ -92,15 +101,16 @@ export async function POST(req: NextRequest) {
           { upsert: true }
         )
 
+        pincodeMap.set(key, { pincode })
         await sleep(1200) // Rate limit protection
       } else {
         cached++
       }
 
       if (pincode) {
-        // Write pincode to all voters matching this location
+        // Write pincode to all voters matching this location using compound index fields
         await voters.updateMany(
-          { district_name, lb_name, ward_number },
+          { district_name: { $in: [district_name, district_name.toUpperCase()] }, lb_name, ward_number },
           { $set: { pincode } }
         )
         resolved++

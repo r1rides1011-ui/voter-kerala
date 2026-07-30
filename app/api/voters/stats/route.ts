@@ -17,50 +17,91 @@ export async function GET(req: NextRequest) {
     if (ward) filters.ward_number = ward;
     if (booth) filters.booth_number = booth;
 
-    // MongoDB statistics
-    const [
-      totalVoters,
-      wards,
-      booths,
-      districts,
-      lbs,
-      activeCount,
-      maleCount,
-      femaleCount,
-      otherGenderCount,
-      flaggedCount,
-      phoneCount,
-      locationCount,
-      avgAge
-    ] = await Promise.all([
-      voters.countDocuments(filters),
-      voters.distinct("ward_number", filters),
-      voters.distinct("booth_number", filters),
-      voters.distinct("district_code", filters),
-      voters.distinct("lb_code", filters),
+    // Execute single-pass aggregation pipeline for maximum speed on 3 Crore records
+    const result = await voters
+      .aggregate([
+        { $match: filters },
+        {
+          $group: {
+            _id: null,
+            totalVoters: { $sum: 1 },
+            activeCount: { $sum: { $cond: [{ $eq: ["$voter_status", "active"] }, 1, 0] } },
+            maleCount: { $sum: { $cond: [{ $eq: ["$gender", "M"] }, 1, 0] } },
+            femaleCount: { $sum: { $cond: [{ $eq: ["$gender", "F"] }, 1, 0] } },
+            otherGenderCount: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $ne: ["$gender", "M"] },
+                      { $ne: ["$gender", "F"] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+            flaggedCount: { $sum: { $cond: [{ $eq: ["$is_flagged", true] }, 1, 0] } },
+            phoneCount: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $ne: ["$phone", null] },
+                      { $ne: ["$phone", ""] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+            locationCount: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $ne: ["$latitude", null] },
+                      { $ne: ["$longitude", null] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+            totalAge: { $sum: { $cond: [{ $gt: ["$age", 0] }, "$age", 0] } },
+            ageCount: { $sum: { $cond: [{ $gt: ["$age", 0] }, 1, 0] } },
+            wards: { $addToSet: "$ward_number" },
+            booths: { $addToSet: "$booth_number" },
+            districts: { $addToSet: "$district_code" },
+            lbs: { $addToSet: "$lb_code" },
+          },
+        },
+      ])
+      .toArray();
 
-      voters.countDocuments({ ...filters, voter_status: "active" }),
-      voters.countDocuments({ ...filters, gender: "M" }),
-      voters.countDocuments({ ...filters, gender: "F" }),
-      voters.countDocuments({ ...filters, gender: { $nin: ["M", "F"] } }),
+    const aggData = result[0] || {
+      totalVoters: 0,
+      activeCount: 0,
+      maleCount: 0,
+      femaleCount: 0,
+      otherGenderCount: 0,
+      flaggedCount: 0,
+      phoneCount: 0,
+      locationCount: 0,
+      totalAge: 0,
+      ageCount: 0,
+      wards: [],
+      booths: [],
+      districts: [],
+      lbs: [],
+    };
 
-      voters.countDocuments({ ...filters, is_flagged: true }),
-      voters.countDocuments({ ...filters, phone: { $ne: null } }),
-
-      voters.countDocuments({
-        ...filters,
-        "location.coordinates.0": { $ne: null },
-        "location.coordinates.1": { $ne: null },
-      }),
-
-      // AVG age using aggregation
-      voters
-        .aggregate([
-          { $match: filters },
-          { $group: { _id: null, avgAge: { $avg: "$age" } } },
-        ])
-        .toArray(),
-    ]);
+    const totalVoters = aggData.totalVoters;
+    const locationCount = aggData.locationCount;
+    const avgAge = aggData.ageCount > 0 ? Number((aggData.totalAge / aggData.ageCount).toFixed(1)) : null;
 
     const stats = {
       filter_level: booth
@@ -74,23 +115,22 @@ export async function GET(req: NextRequest) {
         : "state",
 
       total_voters: totalVoters,
-      total_wards: wards.length,
-      total_booths: booths.length,
-      districts_count: districts.length,
-      local_bodies_count: lbs.length,
+      total_wards: (aggData.wards || []).filter(Boolean).length,
+      total_booths: (aggData.booths || []).filter(Boolean).length,
+      districts_count: (aggData.districts || []).filter(Boolean).length,
+      local_bodies_count: (aggData.lbs || []).filter(Boolean).length,
 
-      active_voters: activeCount,
-      male_count: maleCount,
-      female_count: femaleCount,
-      other_gender_count: otherGenderCount,
+      active_voters: aggData.activeCount,
+      male_count: aggData.maleCount,
+      female_count: aggData.femaleCount,
+      other_gender_count: aggData.otherGenderCount,
 
-      flagged_voters: flaggedCount,
-      with_phone: phoneCount,
+      flagged_voters: aggData.flaggedCount,
+      with_phone: aggData.phoneCount,
       with_location: locationCount,
-      missing_location: totalVoters - locationCount,
+      missing_location: Math.max(0, totalVoters - locationCount),
 
-      avg_age:
-        avgAge.length > 0 ? Number(avgAge[0].avgAge.toFixed(1)) : null,
+      avg_age: avgAge,
     };
 
     return NextResponse.json({ success: true, data: stats });

@@ -169,7 +169,7 @@ export async function POST(_req: NextRequest) {
       // ── Update ALL matching voter records ──
       const vRes = await votersCol.updateMany(
         {
-          district_name: { $regex: new RegExp(`^${district_name}$`, "i") },
+          district_name: { $in: [district_name, districtUpper] },
           lb_name,
           ward_number,
         },

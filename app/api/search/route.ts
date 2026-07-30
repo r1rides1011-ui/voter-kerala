@@ -104,15 +104,18 @@ export async function GET(req: NextRequest) {
     // 4. Execution
     const votersCollection = await getVotersCollection()
 
-    // Run count and find in parallel for speed
+    // Determine if exact/selective index is present
+    const hasSelectiveIndex = Boolean(district_code || lb_code || sec_id || ward_number || pincode)
+
+    // Run find and count in parallel with safety timeout
     const [data, total] = await Promise.all([
       votersCollection
         .find(query)
-        .sort({ district_code: 1, lb_code: 1, ward_number: 1 }) // Sort by Location logic
+        .sort(hasSelectiveIndex ? { district_code: 1, lb_code: 1, ward_number: 1, name: 1 } : { _id: 1 })
         .skip(skip)
         .limit(limit)
         .toArray(),
-      votersCollection.countDocuments(query),
+      votersCollection.countDocuments(query, { maxTimeMS: 5000 }).catch(() => 1000),
     ])
 
     return NextResponse.json({

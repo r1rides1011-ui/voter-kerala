@@ -28,18 +28,14 @@ export async function GET(req: NextRequest, context: { params: { sec_id: string 
     }
 
     let data = await voters.findOne({ sec_id });
-    console.log("[DEBUG] Exact match result:", data);
 
     if (!data) {
-      console.log("[DEBUG] Trying regex case-insensitive match...");
       data = await voters.findOne({
-        sec_id: { $regex: `^${sec_id}$`, $options: "i" },
+        sec_id: { $in: [sec_id, sec_id.toUpperCase(), sec_id.toLowerCase()] },
       });
-      console.log("[DEBUG] Regex match result:", data);
     }
 
     if (!data) {
-      console.warn("[DEBUG] Voter not found for sec_id:", sec_id);
       return NextResponse.json(
         { success: false, error: "Voter not found" },
         { status: 404 }
@@ -47,8 +43,6 @@ export async function GET(req: NextRequest, context: { params: { sec_id: string 
     }
 
     const response: ApiResponse<Voter> = { success: true, data };
-    console.log("[DEBUG] Returning voter data:", data.sec_id);
-
     return NextResponse.json(response);
   } catch (error) {
     console.error("[v0] Fetch voter error:", error);
@@ -86,7 +80,7 @@ export async function PATCH(
     if (house_name !== undefined) updateDoc.house_name = house_name;
 
     const result = await voters.updateOne(
-      { sec_id: { $regex: `^${sec_id}$`, $options: "i" } },
+      { sec_id: { $in: [sec_id, sec_id.toUpperCase(), sec_id.toLowerCase()] } },
       { $set: updateDoc }
     );
 

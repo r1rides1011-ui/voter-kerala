@@ -48,9 +48,9 @@ export async function POST(req: NextRequest) {
       { upsert: true }
     )
 
-    // 2. Update voter records matching this location criteria
+    // 2. Update voter records matching this location criteria using compound index
     const voterQuery: Record<string, any> = {
-      district_name: { $regex: new RegExp(`^${district_name}$`, "i") },
+      district_name: { $in: [district_name, district_name.toUpperCase()] },
       lb_name,
     }
     if (ward_number) voterQuery.ward_number = ward_number

@@ -31,125 +31,127 @@ export async function GET(req: NextRequest) {
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get("limit") || "20", 10)))
 
     const { db } = await connectDb()
-    const voters = await getVotersCollection()
     const pincodesCol = db.collection("pincodes")
+    const voters = await getVotersCollection()
 
-    // Get all stored pincode mappings from cache collection
-    const storedPincodes = await pincodesCol.find({}).toArray()
-    const pincodeMap = new Map<string, any>()
-    for (const p of storedPincodes) {
-      const key = `${p.district_name?.toUpperCase()}|${p.lb_name}|${p.ward_number}`
-      pincodeMap.set(key, p)
+    // 1. Ensure pincodes collection has documents. If empty, seed from voters location combos once.
+    const countPincodes = await pincodesCol.estimatedDocumentCount()
+    if (countPincodes === 0) {
+      const combos = await voters
+        .aggregate([
+          {
+            $group: {
+              _id: {
+                district_name: "$district_name",
+                lb_name: "$lb_name",
+                ward_number: "$ward_number",
+                ward_name: "$ward_name",
+              },
+              voter_count: { $sum: 1 },
+              existing_pincode: { $first: "$pincode" },
+            },
+          },
+        ])
+        .toArray()
+
+      if (combos.length > 0) {
+        const docs = combos.map((c) => ({
+          district_name: (c._id.district_name || "").toUpperCase(),
+          lb_name: c._id.lb_name || "",
+          ward_number: c._id.ward_number || "",
+          ward_name: c._id.ward_name || "",
+          voter_count: c.voter_count || 0,
+          pincode: c.existing_pincode || null,
+          resolved_at: c.existing_pincode ? new Date() : null,
+          source: c.existing_pincode ? "voter_record" : "unresolved",
+          is_verified: false,
+          is_flagged: false,
+        }))
+        await pincodesCol.insertMany(docs, { ordered: false }).catch(() => {})
+      }
     }
 
-    // Pipeline to aggregate distinct location combos from voters with sample/count stats
-    const pipeline: any[] = [
-      {
-        $group: {
-          _id: {
-            district_name: "$district_name",
-            lb_name: "$lb_name",
-            ward_number: "$ward_number",
-            ward_name: "$ward_name",
-          },
-          voter_count: { $sum: 1 },
-          existing_pincode: { $first: "$pincode" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          district_name: "$_id.district_name",
-          lb_name: "$_id.lb_name",
-          ward_number: "$_id.ward_number",
-          ward_name: "$_id.ward_name",
-          voter_count: 1,
-          voter_pincode: "$existing_pincode",
-        },
-      },
-    ]
+    // 2. Build MongoDB filter for pincodes collection
+    const query: Record<string, any> = {}
 
-    const allCombos = (await voters.aggregate(pipeline).toArray()) as unknown as ComboItem[]
-
-    // Enrich with cached pincodes & verification flags
-    let enriched: EnrichedItem[] = allCombos.map((item) => {
-      const key = `${item.district_name?.toUpperCase()}|${item.lb_name}|${item.ward_number}`
-      const cached = pincodeMap.get(key)
-      const pincode = cached?.pincode || item.voter_pincode || null
-      const source = cached?.source || (item.voter_pincode ? "voter_record" : "unresolved")
-      const resolved_at = cached?.resolved_at || null
-      const is_verified = Boolean(cached?.is_verified || cached?.source === "manual" || cached?.source === "manual_verified")
-      const is_flagged = Boolean(cached?.is_flagged)
-
-      return {
-        ...item,
-        pincode,
-        status: pincode ? "resolved" : "unresolved",
-        source,
-        resolved_at,
-        is_verified,
-        is_flagged,
-      }
-    })
-
-    // Get distinct districts & LBs for dropdown filters
-    const districts = Array.from(new Set(enriched.map((i) => i.district_name).filter(Boolean))).sort()
-    const localBodies = Array.from(new Set(enriched.map((i) => i.lb_name).filter(Boolean))).sort()
-
-    // Global stats before filtering
-    const totalLocations = enriched.length
-    const totalResolved = enriched.filter((i) => i.pincode).length
-    const totalUnresolved = totalLocations - totalResolved
-    const totalVerified = enriched.filter((i) => i.is_verified).length
-    const totalFlagged = enriched.filter((i) => i.is_flagged).length
-    const totalVotersUpdated = enriched.reduce(
-      (sum, i) => (i.pincode ? sum + (i.voter_count || 0) : sum),
-      0
-    )
-
-    // Apply filtering
     if (district_name) {
-      enriched = enriched.filter(
-        (i) => i.district_name?.toUpperCase() === district_name.toUpperCase()
-      )
+      query.district_name = district_name.toUpperCase()
     }
     if (lb_name) {
-      enriched = enriched.filter((i) => i.lb_name === lb_name)
+      query.lb_name = lb_name
     }
     if (status === "resolved") {
-      enriched = enriched.filter((i) => !!i.pincode)
+      query.pincode = { $ne: null, $exists: true }
     } else if (status === "unresolved") {
-      enriched = enriched.filter((i) => !i.pincode)
+      query.$or = [{ pincode: null }, { pincode: { $exists: false } }]
     }
 
     if (verification === "verified") {
-      enriched = enriched.filter((i) => i.is_verified)
+      query.is_verified = true
     } else if (verification === "unverified") {
-      enriched = enriched.filter((i) => !i.is_verified && i.pincode)
+      query.is_verified = false
+      query.pincode = { $ne: null, $exists: true }
     } else if (verification === "flagged") {
-      enriched = enriched.filter((i) => i.is_flagged)
+      query.is_flagged = true
     }
 
     if (search) {
-      const q = search.toLowerCase()
-      enriched = enriched.filter(
-        (i) =>
-          i.ward_name?.toLowerCase().includes(q) ||
-          i.ward_number?.toLowerCase().includes(q) ||
-          i.lb_name?.toLowerCase().includes(q) ||
-          i.district_name?.toLowerCase().includes(q) ||
-          i.pincode?.toLowerCase().includes(q)
-      )
+      const qRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
+      query.$or = [
+        { ward_name: qRegex },
+        { ward_number: qRegex },
+        { lb_name: qRegex },
+        { district_name: qRegex },
+        { pincode: qRegex },
+      ]
     }
 
-    const filteredTotal = enriched.length
+    // 3. Fast parallel query execution
+    const [storedPincodes, filteredTotal, allDocs] = await Promise.all([
+      pincodesCol
+        .find(query)
+        .sort({ district_name: 1, lb_name: 1, ward_number: 1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .toArray(),
+      pincodesCol.countDocuments(query),
+      pincodesCol.find({}).project({ district_name: 1, lb_name: 1, pincode: 1, is_verified: 1, is_flagged: 1, voter_count: 1 }).toArray(),
+    ])
+
+    const enriched: EnrichedItem[] = storedPincodes.map((p: any) => ({
+      district_name: p.district_name,
+      lb_name: p.lb_name,
+      ward_number: p.ward_number,
+      ward_name: p.ward_name,
+      voter_count: p.voter_count || 0,
+      voter_pincode: p.pincode,
+      pincode: p.pincode || null,
+      status: p.pincode ? "resolved" : "unresolved",
+      source: p.source || (p.pincode ? "voter_record" : "unresolved"),
+      resolved_at: p.resolved_at || null,
+      is_verified: Boolean(p.is_verified || p.source === "manual" || p.source === "manual_verified"),
+      is_flagged: Boolean(p.is_flagged),
+    }))
+
+    // Global dropdown filters and stats from all metadata documents
+    const districts = Array.from(new Set(allDocs.map((i: any) => i.district_name).filter(Boolean))).sort()
+    const localBodies = Array.from(new Set(allDocs.map((i: any) => i.lb_name).filter(Boolean))).sort()
+
+    const totalLocations = allDocs.length
+    const totalResolved = allDocs.filter((i: any) => i.pincode).length
+    const totalUnresolved = totalLocations - totalResolved
+    const totalVerified = allDocs.filter((i: any) => i.is_verified).length
+    const totalFlagged = allDocs.filter((i: any) => i.is_flagged).length
+    const totalVotersUpdated = allDocs.reduce(
+      (sum: number, i: any) => (i.pincode ? sum + (i.voter_count || 0) : sum),
+      0
+    )
+
     const totalPages = Math.ceil(filteredTotal / limit) || 1
-    const startIndex = (page - 1) * limit
-    const paginatedItems = enriched.slice(startIndex, startIndex + limit)
 
     return NextResponse.json({
       success: true,
-      data: paginatedItems,
+      data: enriched,
       pagination: {
         page,
         limit,

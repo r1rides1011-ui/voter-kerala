@@ -58,10 +58,10 @@ export async function POST(req: NextRequest) {
         { upsert: true }
       )
 
-      // Update voter records
+      // Update voter records using compound index
       const updateRes = await voters.updateMany(
         {
-          district_name: { $regex: new RegExp(`^${district_name}$`, "i") },
+          district_name: { $in: [district_name, district_name.toUpperCase()] },
           lb_name,
           ward_number,
         },
